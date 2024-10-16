@@ -497,3 +497,80 @@ class TestWhiteBoxHomework(unittest.TestCase):
         self.assertEqual(check_loan_eligibility(100000, 500), "Secured Loan")
     
     # 18
+    def test_calculate_shipping_cost_low_price(self):
+        """
+        Checks the shipping cost for low price.
+        """
+        self.assertEqual(calculate_shipping_cost(1, 1, 1, 1), 5)
+    
+    def test_calculate_shipping_cost_mid_price(self):
+        """
+        Checks the shipping cost for mid price.
+        """
+        self.assertEqual(calculate_shipping_cost(4, 15, 15, 15), 10)
+    
+    def test_calculate_shipping_cost_high_price(self):
+        """
+        Checks the shipping cost for high price.
+        """
+        self.assertEqual(calculate_shipping_cost(10, 300, 300, 300), 20)
+    
+    # 19
+    def test_grade_quiz_pass(self):
+        """
+        Checks the quiz is passed.
+        """
+        self.assertEqual(grade_quiz(8, 1), "Pass")
+    
+    def test_grade_quiz_conditional_pass(self):
+        """
+        Checks the quiz is conditionally passed.
+        """
+        self.assertEqual(grade_quiz(6, 1), "Conditional Pass")
+    
+    def test_grade_quiz_fail(self):
+        """
+        Checks the quiz is failed.
+        """
+        self.assertEqual(grade_quiz(4, 1), "Fail")
+    
+    # 20
+    def test_authenticate_user_admin(self):
+        """
+        Checks the user is an admin.
+        """
+        self.assertEqual(authenticate_user("admin", "admin123"), "Admin")
+    
+    def test_authenticate_user_user(self):
+        """
+        Checks the user is a regular user.
+        """
+        self.assertEqual(authenticate_user("12345678", "12345678"), "User")
+    
+    def test_authenticate_user_invalid(self):
+        """
+        Checks the user is invalid.
+        """
+        self.assertEqual(authenticate_user("admin", "admin"), "Invalid")
+    
+    # 21
+    def test_get_weather_advisory_high(self):
+        """
+        Checks the weather advisory is high.
+        """
+        self.assertEqual(get_weather_advisory(35, 80), "High Temperature and Humidity. Stay Hydrated.")
+    
+    def test_get_weather_advisory_low(self):
+        """
+        Checks the weather advisory is low.
+        """
+        self.assertEqual(get_weather_advisory(-20, 50), "Low Temperature. Bundle Up!")
+    
+    def test_get_weather_advisory_normal(self):
+        """
+        Checks the weather advisory is normal.
+        """
+        self.assertEqual(get_weather_advisory(20, 50), "No Specific Advisory")
+    
+    # 22
+    
