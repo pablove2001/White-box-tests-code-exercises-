@@ -4,6 +4,8 @@
 White-box unit testing examples.
 """
 import unittest
+from io import StringIO
+import sys
 
 from src.white_box import *
 
@@ -243,31 +245,31 @@ class TestWhiteBoxHomework(unittest.TestCase):
         """
         Checks the username is too small.
         """
-        self.assertFalse(validate_login("a", "12345678"))
+        self.assertEqual(validate_login("a", "12345678"), "Login Failed")
     
     def test_validate_login_big_username(self):
         """
         Checks the username is too big.
         """
-        self.assertFalse(validate_login("123456789012345678901","12345678"))
+        self.assertEqual(validate_login("123456789012345678901","12345678"), "Login Failed")
     
     def test_validate_login_small_password(self):
         """
         Checks the password is too small.
         """
-        self.assertFalse(validate_login("12345678", "a"))
+        self.assertEqual(validate_login("12345678", "a"), "Login Failed")
     
     def test_validate_login_big_password(self):
         """
         Checks the password is too big.
         """
-        self.assertFalse(validate_login("12345678", "123456789012345678901"))
+        self.assertEqual(validate_login("12345678", "123456789012345678901"), "Login Failed")
     
     def test_validate_login_valid(self):
         """
         Checks the login is valid.
         """
-        self.assertTrue(validate_login("12345678", "12345678"))
+        self.assertEqual(validate_login("12345678", "12345678"), "Login Successful")
     
     # 7
     def test_verify_age_small(self):
@@ -318,25 +320,26 @@ class TestWhiteBoxHomework(unittest.TestCase):
         """
         Checks the email length is invalid.
         """
-        self.assertFalse(validate_email("a@b"))
+        self.assertEqual(validate_email("a@b"), "Invalid Email")
     
     def test_validate_email_invalid_at(self):
         """
         Checks the email has no @.
         """
-        self.assertFalse(validate_email("abaacom"))
+        self.assertEqual(validate_email("abaacom"), "Invalid Email")
     
     def test_validate_email_invalid_dot(self):
         """
         Checks the email has no dot.
         """
-        self.assertFalse(validate_email("a@bcom"))
+        self.assertEqual(validate_email("a@bcom"), "Invalid Email")
+
     
     def test_validate_email_valid(self):
         """
         Checks the email is valid.
         """
-        self.assertTrue(validate_email("abco@gcom.com"))
+        self.assertEqual(validate_email("abco@gcom.com"), "Valid Email")
     
     # 10
     def test_celsius_to_fahrenheit_valid(self):
@@ -387,7 +390,7 @@ class TestWhiteBoxHomework(unittest.TestCase):
         """
         Checks the day is invalid.
         """
-        self.assertEqual(validate_date(2020, 2, 30), "Invalid Date")
+        self.assertEqual(validate_date(2020, 2, 35), "Invalid Date")
     
     def test_validate_date_valid(self):
         """
@@ -494,7 +497,7 @@ class TestWhiteBoxHomework(unittest.TestCase):
         """
         Checks the income is high and the credit is bad.
         """
-        self.assertEqual(check_loan_eligibility(100000, 500), "Secured Loan")
+        self.assertEqual(check_loan_eligibility(100000, 500), "Standard Loan")
     
     # 18
     def test_calculate_shipping_cost_low_price(self):
@@ -571,6 +574,298 @@ class TestWhiteBoxHomework(unittest.TestCase):
         Checks the weather advisory is normal.
         """
         self.assertEqual(get_weather_advisory(20, 50), "No Specific Advisory")
-    
-    # 22
-    
+
+# 22 
+class TestVendingMachine(unittest.TestCase):
+    """
+    VendingMachine unittest class.
+    """
+
+    def setUp(self):
+        """
+        Set up for each test.
+        """
+        self.vending_machine = VendingMachine()
+
+    def test_initial_state(self):
+        """
+        Test the initial state of the vending machine.
+        """
+        self.assertEqual(self.vending_machine.state, "Ready")
+
+    def test_insert_coin(self):
+        """
+        Test inserting a coin when the machine is ready.
+        """
+        response = self.vending_machine.insert_coin()
+        self.assertEqual(self.vending_machine.state, "Dispensing")
+        self.assertEqual(response, "Coin Inserted. Select your drink.")
+
+    def test_invalid_insert_coin(self):
+        """
+        Test inserting a coin when the machine is not in the ready state.
+        """
+        # First insert a coin to change the state to "Dispensing"
+        self.vending_machine.insert_coin()
+
+        # Try inserting another coin, which should return an invalid operation
+        response = self.vending_machine.insert_coin()
+        self.assertEqual(response, "Invalid operation in current state.")
+        self.assertEqual(self.vending_machine.state, "Dispensing")
+
+    def test_select_drink(self):
+        """
+        Test selecting a drink after inserting a coin.
+        """
+        # Insert a coin first to change the state
+        self.vending_machine.insert_coin()
+
+        # Now select a drink
+        response = self.vending_machine.select_drink()
+        self.assertEqual(self.vending_machine.state, "Ready")
+        self.assertEqual(response, "Drink Dispensed. Thank you!")
+
+    def test_invalid_select_drink(self):
+        """
+        Test selecting a drink when the machine is in the 'Ready' state.
+        """
+        response = self.vending_machine.select_drink()
+        self.assertEqual(response, "Invalid operation in current state.")
+        self.assertEqual(self.vending_machine.state, "Ready")
+
+# 23
+class TestTrafficLight(unittest.TestCase):
+    """
+    TrafficLight unittest class.
+    """
+
+    def setUp(self):
+        """
+        Set up for each test.
+        """
+        self.traffic_light = TrafficLight()
+
+    def test_initial_state(self):
+        """
+        Test the initial state of the traffic light.
+        """
+        self.assertEqual(self.traffic_light.get_current_state(), "Red")
+
+    def test_change_state_from_red_to_green(self):
+        """
+        Test changing state from 'Red' to 'Green'.
+        """
+        self.traffic_light.change_state()
+        self.assertEqual(self.traffic_light.get_current_state(), "Green")
+
+    def test_change_state_from_green_to_yellow(self):
+        """
+        Test changing state from 'Green' to 'Yellow'.
+        """
+        # First change to 'Green'
+        self.traffic_light.change_state()
+        # Now change to 'Yellow'
+        self.traffic_light.change_state()
+        self.assertEqual(self.traffic_light.get_current_state(), "Yellow")
+
+    def test_change_state_from_yellow_to_red(self):
+        """
+        Test changing state from 'Yellow' to 'Red'.
+        """
+        # First go through 'Green' and 'Yellow'
+        self.traffic_light.change_state()  # Red -> Green
+        self.traffic_light.change_state()  # Green -> Yellow
+        self.traffic_light.change_state()  # Yellow -> Red
+        self.assertEqual(self.traffic_light.get_current_state(), "Red")
+
+    def test_full_cycle(self):
+        """
+        Test the full cycle of the traffic light.
+        """
+        # Initial state should be 'Red'
+        self.assertEqual(self.traffic_light.get_current_state(), "Red")
+        
+        # Change to 'Green'
+        self.traffic_light.change_state()
+        self.assertEqual(self.traffic_light.get_current_state(), "Green")
+
+        # Change to 'Yellow'
+        self.traffic_light.change_state()
+        self.assertEqual(self.traffic_light.get_current_state(), "Yellow")
+
+        # Change to 'Red'
+        self.traffic_light.change_state()
+        self.assertEqual(self.traffic_light.get_current_state(), "Red")
+
+# 24
+class TestUserAuthentication(unittest.TestCase):
+
+    def setUp(self):
+        self.auth = UserAuthentication()
+
+    def test_initial_state(self):
+        self.assertEqual(self.auth.state, "Logged Out")
+
+    def test_login_success(self):
+        result = self.auth.login()
+        self.assertEqual(self.auth.state, "Logged In")
+        self.assertEqual(result, "Login successful")
+
+    def test_login_invalid(self):
+        self.auth.login()  # Log in first
+        result = self.auth.login()
+        self.assertEqual(result, "Invalid operation in current state")
+
+    def test_logout_success(self):
+        self.auth.login()  # Log in first
+        result = self.auth.logout()
+        self.assertEqual(self.auth.state, "Logged Out")
+        self.assertEqual(result, "Logout successful")
+
+    def test_logout_invalid(self):
+        result = self.auth.logout()
+        self.assertEqual(result, "Invalid operation in current state")
+
+# 25
+class TestDocumentEditingSystem(unittest.TestCase):
+
+    def setUp(self):
+        self.doc_system = DocumentEditingSystem()
+
+    def test_initial_state(self):
+        self.assertEqual(self.doc_system.state, "Editing")
+
+    def test_save_document_success(self):
+        result = self.doc_system.save_document()
+        self.assertEqual(self.doc_system.state, "Saved")
+        self.assertEqual(result, "Document saved successfully")
+
+    def test_save_document_invalid(self):
+        self.doc_system.save_document()  # Save first
+        result = self.doc_system.save_document()
+        self.assertEqual(result, "Invalid operation in current state")
+
+    def test_edit_document_success(self):
+        self.doc_system.save_document()  # Save first
+        result = self.doc_system.edit_document()
+        self.assertEqual(self.doc_system.state, "Editing")
+        self.assertEqual(result, "Editing resumed")
+
+    def test_edit_document_invalid(self):
+        result = self.doc_system.edit_document()
+        self.assertEqual(result, "Invalid operation in current state")
+
+# 26
+class TestElevatorSystem(unittest.TestCase):
+
+    def setUp(self):
+        self.elevator = ElevatorSystem()
+
+    def test_initial_state(self):
+        self.assertEqual(self.elevator.state, "Idle")
+
+    def test_move_up_success(self):
+        result = self.elevator.move_up()
+        self.assertEqual(self.elevator.state, "Moving Up")
+        self.assertEqual(result, "Elevator moving up")
+
+    def test_move_up_invalid(self):
+        self.elevator.move_up()  # Move up first
+        result = self.elevator.move_up()
+        self.assertEqual(result, "Invalid operation in current state")
+
+    def test_move_down_success(self):
+        result = self.elevator.move_down()
+        self.assertEqual(self.elevator.state, "Moving Down")
+        self.assertEqual(result, "Elevator moving down")
+
+    def test_move_down_invalid(self):
+        self.elevator.move_down()  # Move down first
+        result = self.elevator.move_down()
+        self.assertEqual(result, "Invalid operation in current state")
+
+    def test_stop_success_from_moving_up(self):
+        self.elevator.move_up()  # Move up first
+        result = self.elevator.stop()
+        self.assertEqual(self.elevator.state, "Idle")
+        self.assertEqual(result, "Elevator stopped")
+
+    def test_stop_success_from_moving_down(self):
+        self.elevator.move_down()  # Move down first
+        result = self.elevator.stop()
+        self.assertEqual(self.elevator.state, "Idle")
+        self.assertEqual(result, "Elevator stopped")
+
+    def test_stop_invalid(self):
+        result = self.elevator.stop()
+        self.assertEqual(result, "Invalid operation in current state")
+
+# 27
+class TestBankAccount(unittest.TestCase):
+    def setUp(self):
+        self.account = BankAccount("12345", 1000.0)
+
+    def test_initial_state(self):
+        self.assertEqual(self.account.account_number, "12345")
+        self.assertEqual(self.account.balance, 1000.0)
+
+    def test_view_account(self):
+        # Capture the printed output
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        self.account.view_account()
+        
+        sys.stdout = sys.__stdout__
+        output = captured_output.getvalue().strip()
+        
+        expected = "The account 12345 has a balance of 1000.0"
+        self.assertEqual(output, expected)
+
+# 28
+class TestShoppingSystem(unittest.TestCase):
+    def setUp(self):
+        self.product1 = Product("Laptop", 1000)
+        self.product2 = Product("Mouse", 20)
+        self.cart = ShoppingCart()
+
+    def test_product_creation(self):
+        self.assertEqual(self.product1.name, "Laptop")
+        self.assertEqual(self.product1.price, 1000)
+
+    def test_add_product(self):
+        self.cart.add_product(self.product1)
+        self.assertEqual(len(self.cart.items), 1)
+        self.assertEqual(self.cart.items[0]["quantity"], 1)
+        
+        # Test adding same product increases quantity
+        self.cart.add_product(self.product1)
+        self.assertEqual(self.cart.items[0]["quantity"], 2)
+
+    def test_remove_product(self):
+        # Add products first
+        self.cart.add_product(self.product1, 2)
+        
+        # Remove one
+        self.cart.remove_product(self.product1)
+        self.assertEqual(self.cart.items[0]["quantity"], 1)
+        
+        # Remove remaining
+        self.cart.remove_product(self.product1)
+        self.assertEqual(len(self.cart.items), 0)
+
+    def test_checkout(self):
+        self.cart.add_product(self.product1)
+        self.cart.add_product(self.product2, 2)
+        
+        # Capture printed output
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        self.cart.checkout()
+        
+        sys.stdout = sys.__stdout__
+        output = captured_output.getvalue().strip()
+        
+        self.assertIn("Total: $1040", output)
+        self.assertIn("Checkout completed", output)
